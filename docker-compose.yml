@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  springbootapp:
+    restart: on-failure:3
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      MYSQL_HOST: mysqldb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_PORT: 3306
+    networks:
+      - rest_api_redis_caching
+    depends_on:
+      - mysqldb
+      - redis
+
+  mysqldb:
+    image: mysql
+    restart: on-failure:2
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - rest_api_redis_caching
+
+  rediscache:
+    image: redis:7-alpine
+    # hostname: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - rest_api_redis_caching
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=yes
+#      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+networks:
+  rest_api_redis_caching:
+
+volumes:
+  db-data:
